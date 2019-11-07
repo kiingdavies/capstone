@@ -75,7 +75,7 @@ app.post('/gif', function(request, response) {
 });
 
 // UPDATE request
-
+// Put update here
 
 // DELETE request
 app.delete('/gif/:gifid', function(request, response) {
