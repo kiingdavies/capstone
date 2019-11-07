@@ -17,6 +17,7 @@ const app = express();
 
 // ROUTES 
 const articleRoutes = require('./api/routes/article');
+const authorRoutes = require('./api/routes/author');
 
 // TO log in the terminal
 app.use(morgan('dev'));
@@ -34,6 +35,7 @@ app.use((request, response, next) => {
   });
 
 app.use('/article', articleRoutes);
+app.use('/author', authorRoutes);
 
 
 // To handle all requests that werent handled above
