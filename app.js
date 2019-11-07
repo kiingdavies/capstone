@@ -5,22 +5,13 @@ const pg = require('pg');
 const cors = require('cors');
 const app = express();
 
-// POSTGRESQL connection
-// const pool = new pg.Pool({
-//     port: 5432,
-//     password: 'adedeji007',
-//     database: 'teamwork',
-//     max: 10,
-//     host: 'localhost',
-//     user: 'postgres'
-// });
-
 // ROUTES 
 const articleRoutes = require('./api/routes/article');
 const authorRoutes = require('./api/routes/author');
 const feedRoutes = require('./api/routes/feed');
+const gifRoutes = require('./api/routes/gif');
 
-// TO log in the terminal
+// To log in the terminal
 app.use(morgan('dev'));
 app.use(cors());
 app.use(bodyParser.json());
@@ -38,6 +29,7 @@ app.use((request, response, next) => {
 app.use('/article', articleRoutes);
 app.use('/author', authorRoutes);
 app.use('/feed', feedRoutes);
+app.use('/gif', gifRoutes);
 
 
 // To handle all requests that werent handled above
