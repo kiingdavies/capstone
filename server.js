@@ -4,30 +4,34 @@ const morgan = require('morgan');
 const pg = require('pg');
 const cors = require('cors');
 const PORT = 3000;
-const app = express();
+// const app = express();
+const http = require('http');
+const app = require('./app');
+const server = http.createServer(app);
 
-app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(morgan('dev'));
+// app.use(cors());
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: true }));
 
-const pool = new pg.Pool({
-    port: 5432,
-    password: 'adedeji007',
-    database: 'teamwork',
-    max: 10,
-    host: 'localhost',
-    user: 'postgres'
-});
+// const pool = new pg.Pool({
+//     port: 5432,
+//     password: 'adedeji007',
+//     database: 'teamwork',
+//     max: 10,
+//     host: 'localhost',
+//     user: 'postgres'
+// });
 
-app.use(morgan('dev'));
 
-// CORS to make sure the front end can safely make calls to your app.
-app.use((request, response, next) => {
-    response.setHeader('Access-Control-Allow-Origin', '*');
-    response.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
-    response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-    next();
-  });
+
+// // CORS to make sure the front end can safely make calls to your app.
+// app.use((request, response, next) => {
+//     response.setHeader('Access-Control-Allow-Origin', '*');
+//     response.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
+//     response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+//     next();
+//   });
 
 // pool.connect((err, db, done) => {
 //     if(err) {
@@ -74,8 +78,26 @@ app.post('/gif', function(request, response) {
 
 });
 
-// UPDATE request
-// Put update here
+// // UPDATE request
+// app.patch('/:gifid', function(request, response) {
+//     var id = request.params.gifid;
+//     pool.connect((err, db, done) => {
+//         if(err) {
+//             return response.status(400).send(err)
+//         }
+//         else {
+//             db.query('UPDATE gif SET title = "Dramatic" WHERE gifid= $1', [id], (err, result) => {
+//                 if(err) {
+//                     return response.status(400).send(err)
+//                 }
+//                 else {
+//                     return response.status(200).send({message: 'record updated successfully!'});
+                    
+//                 }
+//             })
+//         }
+//     })
+// })
 
 // DELETE request
 app.delete('/gif/:gifid', function(request, response) {
@@ -120,4 +142,4 @@ app.get('/', function(request, response) {
 
 
 
-app.listen(PORT, () => console.log('Listening on port  ' + PORT));
+server.listen(PORT, () => console.log('Listening on port  ' + PORT));
