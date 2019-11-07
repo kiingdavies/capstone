@@ -41,6 +41,23 @@ router.post('/', function(request, response){
 })
 
 });
+//Code model sample
+// pool.connect((err, db, done) => {
+//     if(err) {
+//         return console.log(err)
+//     }
+//     else {
+//         db.query('SELECT * FROM gif', (err, table) => {
+//             if(err) {
+//                 return console.log(err)
+//             }
+//             else {
+//                 console.log(table.rows[1].title)
+                
+//             }
+//         })
+//     }
+// })
 
 // UPDATE request
 // router.patch('/:gifid', function(request, response) {
