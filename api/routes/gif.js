@@ -15,32 +15,31 @@ const pool = new pg.Pool({
 });
 
 // POST request
-router.post('/', function(request, response){
-    var gifid = request.body.gifid;
-    var message = request.body.message;
-    var createdon = request.body.createdon;
-    var title = request.body.title;
-    var imageurl = request.body.imageurl;
+router.post('/', (request, response) => {
+    const gifid = request.body.gifid;
+    const message = request.body.message;
+    const createdon = request.body.createdon;
+    const title = request.body.title;
+    const imageurl = request.body.imageurl;
+
     let values = [gifid, message, createdon, title, imageurl];
     pool.connect((err, db, done) => {
-    if(err) {
-        return response.status(400).send(err) //return console.log(err)
-    }
-    else {
-        db.query('INSERT INTO gif (gifid, message, createdon, title, imageurl) VALUES($1, $2, $3, $4, $5)', [...values], (err, table) => {
-            if(err) {
-                return response.status(400).send(err)
-            }
-            else {
-                console.log('DATA INSERTED');
-                db.end();
-                response.status(201).send('Data Inserted')
-            }
+   
+        db.query('INSERT INTO gif (gifid, message, createdon, title, imageurl) VALUES($1, $2, $3, $4, $5)', [...values]) 
+        .then(() => {
+            response.status(201).json({
+                status: "success",
+                message: "gif posted successfully!"
+            })
+        }).catch((error) => {
+            console.log(error)
+            response.status(400).json({
+                error: error,
+            })
         })
-    }
-})
-
+    })
 });
+
 //Code model sample
 // pool.connect((err, db, done) => {
 //     if(err) {
@@ -60,71 +59,70 @@ router.post('/', function(request, response){
 // })
 
 // UPDATE request
-router.patch('/:gifid', function(request, response) {
-    var gifid = request.body.gifid;
-    var message = request.body.message;
-    var createdon = request.body.createdon;
-    var title = request.body.title;
-    var imageurl = request.body.imageurl;
-    let values = [gifid, message, createdon, title, imageurl];
-    var id = request.params.gifid;
+router.patch('/:gifid',(request, response) => {
+    const message = request.body.message;
+    const createdon = request.body.createdon;
+    const title = request.body.title;
+    const imageurl = request.body.imageurl;
+    const gifid = parseInt(request.params.gifid);
+
+    let values = [message, createdon, title, imageurl, gifid];
     pool.connect((err, db, done) => {
-        if(err) {
-            return response.status(400).send(err)
-        }
-        else {
-            db.query('UPDATE gif SET title = "Dramatic" WHERE gifid= $1', [id], (err, result) => {
-                if(err) {
-                    return response.status(400).send(err)
-                }
-                else {
-                    return response.status(200).send({message: 'record updated successfully!'});
-                    
-                }
-            })
-        }
+
+        db.query('UPDATE gif SET "message"=$1 , "createdon"=$2 , "title"=$3, "imageurl"=$4 WHERE "gifid"=$5', [...values])
+            .then(() => {
+                response.status(201).json({
+                    status: "success",
+                    message: "gif updated successfully!"
+                })
+            }).catch((error) => {
+                console.log(error)
+                response.status(400).json({
+                    error: error,
+                })
+        })
     })
 })
 
 // DELETE request
-router.delete('/:gifid', function(request, response) {
+router.delete('/:gifid', (request, response) => {
     var id = request.params.gifid;
     pool.connect((err, db, done) => {
-    if(err) {
-        return response.status(400).send(err)
-    }
-    else {
-        db.query('DELETE FROM gif WHERE gifid = $1', [id], (err, result) => {
-            if(err) {
-                return response.status(400).send(err)
-            }
-            else {
-                return response.status(200).send({message: 'record deleted successfully!'});
-                
-            }
+
+        db.query('DELETE FROM gif WHERE gifid = $1', [id]) 
+        .then(() => {
+            response.status(201).json({
+                status: "success",
+                message: "gif deleted successfully!"
+            })
+        }).catch((error) => {
+            console.log(error)
+            response.status(400).json({
+                error: error,
+            })
         })
-    }
-})
+    })
 });
 
+
 // GET request
-router.get('/', function(request, response) {
+router.get('/', (request, response) => {
     pool.connect((err, db, done) => {
-    if(err) {
-        return response.status(400).send(err)
-    }
-    else {
-        db.query('SELECT * FROM gif', (err, table) => {
-            // done();
-            if(err) {
-                return response.status(400).send(err)
-            }
-            else {
-                return response.status(200).send(table.rows);
-            }
+
+    db.query('SELECT * FROM gif')
+    .then((gif) => {
+        response.status(200).json({
+            status: "success",
+            data: gif.rows
         })
-    }
-})
+    }).catch((error) => {
+        console.log(error)
+        response.status(400).json({
+            error: error,
+        })
+     })
+    })
 });
+
 
 module.exports = router;

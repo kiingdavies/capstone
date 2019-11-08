@@ -55,7 +55,7 @@ router.patch('/:articleid',(request, response) => {
             .then(() => {
                 response.status(201).json({
                     status: "success",
-                    message: "record updated successfully!"
+                    message: "article updated successfully!"
                 })
             }).catch((error) => {
                 console.log(error)
@@ -85,15 +85,16 @@ router.delete('/:articleid', (request, response) => {
         })
     })
 });
+
 // GET request
 router.get('/', (request, response) => {
     pool.connect((err, db, done) => {
 
     db.query('SELECT * FROM article')
-    .then((articles) => {
+    .then((article) => {
         response.status(200).json({
             status: "success",
-            data: articles.rows
+            data: article.rows
         })
     }).catch((error) => {
         console.log(error)
