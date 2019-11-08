@@ -49,7 +49,6 @@ const onError = (error) => {
             break;
         default:
             throw error;
-            
     }
 }
 
