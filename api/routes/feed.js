@@ -100,9 +100,9 @@ router.get('/', (request, response) => {
         console.log(error)
         response.status(400).json({
             error: error,
+            })
         })
     })
-})
 });
 
 
