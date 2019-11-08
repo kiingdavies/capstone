@@ -43,25 +43,36 @@ router.post('/', function(request, response){
 });
 
 // UPDATE request
-// router.patch('/:gifid', function(request, response) {
-//     var id = request.params.gifid;
-//     pool.connect((err, db, done) => {
-//         if(err) {
-//             return response.status(400).send(err)
-//         }
-//         else {
-//             db.query('UPDATE gif SET title = "Dramatic" WHERE gifid= $1', [id], (err, result) => {
-//                 if(err) {
-//                     return response.status(400).send(err)
-//                 }
-//                 else {
-//                     return response.status(200).send({message: 'record updated successfully!'});
-                    
-//                 }
-//             })
-//         }
-//     })
-// })
+router.patch('/:articleid', function(request, response) {
+    const authorid = request.body.authorid;
+    const message = request.body.message;
+    const createdon = request.body.createdon;
+    const title = request.body.title;
+    const articleid = parseInt(request.params.articleid);
+   
+    let values = [ authorid, message, createdon, title, articleid];
+    pool.connect((err, db, done) => {
+        if(err) {
+            return response.status(400).send(err)
+        }
+        else {
+            db.query('UPDATE "article" SET "authorid"=$1,"message"=$2 , "createdon"=$3 , "title"=$4 WHERE "articleid"=$5', [...values]) 
+            .then(() => {
+                response.status(201).json({
+                    status: "success",
+                    message: "record updated successfully!"
+                })
+            }).catch((error) => {
+                console.log(error)
+                response.status(400).json({
+                    error: error,
+                })
+                
+            })
+                
+            }
+    })
+})
 
 // DELETE request
 router.delete('/:articleid', function(request, response) {

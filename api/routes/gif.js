@@ -60,25 +60,31 @@ router.post('/', function(request, response){
 // })
 
 // UPDATE request
-// router.patch('/:gifid', function(request, response) {
-//     var id = request.params.gifid;
-//     pool.connect((err, db, done) => {
-//         if(err) {
-//             return response.status(400).send(err)
-//         }
-//         else {
-//             db.query('UPDATE gif SET title = "Dramatic" WHERE gifid= $1', [id], (err, result) => {
-//                 if(err) {
-//                     return response.status(400).send(err)
-//                 }
-//                 else {
-//                     return response.status(200).send({message: 'record updated successfully!'});
+router.patch('/:gifid', function(request, response) {
+    var gifid = request.body.gifid;
+    var message = request.body.message;
+    var createdon = request.body.createdon;
+    var title = request.body.title;
+    var imageurl = request.body.imageurl;
+    let values = [gifid, message, createdon, title, imageurl];
+    var id = request.params.gifid;
+    pool.connect((err, db, done) => {
+        if(err) {
+            return response.status(400).send(err)
+        }
+        else {
+            db.query('UPDATE gif SET title = "Dramatic" WHERE gifid= $1', [id], (err, result) => {
+                if(err) {
+                    return response.status(400).send(err)
+                }
+                else {
+                    return response.status(200).send({message: 'record updated successfully!'});
                     
-//                 }
-//             })
-//         }
-//     })
-// })
+                }
+            })
+        }
+    })
+})
 
 // DELETE request
 router.delete('/:gifid', function(request, response) {
