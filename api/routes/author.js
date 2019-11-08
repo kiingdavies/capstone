@@ -16,9 +16,9 @@ const pool = new pg.Pool({
 
 // POST request
 router.post('/', (request, response) => {
-    var message = request.body.message;
-    var token = request.body.token;
-    var authorid = request.body.authorid;
+    const message = request.body.message;
+    const token = request.body.token;
+    const authorid = request.body.authorid;
    
     let values = [ message, token, authorid];
     pool.connect((err, db, done) => {
