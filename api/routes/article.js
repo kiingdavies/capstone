@@ -68,10 +68,10 @@ router.patch('/:articleid',(request, response) => {
 
 // DELETE request
 router.delete('/:articleid', (request, response) => {
-    var id = request.params.articleid;
+    var articleid = request.params.articleid;
     pool.connect((err, db, done) => {
 
-        db.query('DELETE FROM article WHERE articleid = $1', [id]) 
+        db.query('DELETE FROM article WHERE articleid = $1', [articleid]) 
         .then(() => {
             response.status(201).json({
                 status: "success",

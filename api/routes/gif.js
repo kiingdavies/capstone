@@ -86,10 +86,10 @@ router.patch('/:gifid',(request, response) => {
 
 // DELETE request
 router.delete('/:gifid', (request, response) => {
-    var id = request.params.gifid;
+    var gifid = request.params.gifid;
     pool.connect((err, db, done) => {
 
-        db.query('DELETE FROM gif WHERE gifid = $1', [id]) 
+        db.query('DELETE FROM gif WHERE gifid = $1', [gifid]) 
         .then(() => {
             response.status(201).json({
                 status: "success",

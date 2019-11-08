@@ -15,90 +15,89 @@ const pool = new pg.Pool({
 });
 
 // POST request
-router.post('/', function(request, response){
+router.post('/', (request, response) => {
     var message = request.body.message;
     var token = request.body.token;
     var authorid = request.body.authorid;
    
     let values = [ message, token, authorid];
     pool.connect((err, db, done) => {
-    if(err) {
-        return response.status(400).send(err) //return console.log(err)
-    }
-    else {
-        db.query('INSERT INTO author (message, token, authorid) VALUES($1, $2, $3)', [...values], (err, table) => {
-            if(err) {
-                return response.status(400).send(err)
-            }
-            else {
-                console.log('DATA INSERTED');
-                db.end();
-                response.status(201).send('Data Inserted')
-            }
+    
+        db.query('INSERT INTO author (message, token, authorid) VALUES($1, $2, $3)', [...values]) 
+        .then(() => {
+            response.status(201).json({
+                status: "success",
+                message: "author posted successfully!"
+            })
+        }).catch((error) => {
+            console.log(error)
+            response.status(400).json({
+                error: error,
+            })
         })
-    }
-})
+    })
 });
 
 // UPDATE request
-// router.patch('/:authorid', function(request, response) {
-//     var id = request.params.gifid;
-//     pool.connect((err, db, done) => {
-//         if(err) {
-//             return response.status(400).send(err)
-//         }
-//         else {
-//             db.query('UPDATE gif SET title = "Dramatic" WHERE gifid= $1', [id], (err, result) => {
-//                 if(err) {
-//                     return response.status(400).send(err)
-//                 }
-//                 else {
-//                     return response.status(200).send({message: 'record updated successfully!'});
-                    
-//                 }
-//             })
-//         }
-//     })
-// })
+router.patch('/:authorid',(request, response) => {
+    const message = request.body.message;
+    const token = request.body.token;
+    const authorid = parseInt(request.params.authorid);
+   
+    let values = [ message, token, authorid];
+    pool.connect((err, db, done) => {
+       
+        db.query('UPDATE "author" SET "message"=$1 , "token"=$2 WHERE "authorid"=$3', [...values]) 
+            .then(() => {
+                response.status(201).json({
+                    status: "success",
+                    message: "author updated successfully!"
+                })
+            }).catch((error) => {
+                console.log(error)
+                response.status(400).json({
+                    error: error,
+                })
+        })
+    })
+})
 
 // DELETE request
-router.delete('/:authorid', function(request, response) {
-    var id = request.params.authorid;
+router.delete('/:authorid', (request, response) => {
+    var authorid = request.params.authorid;
     pool.connect((err, db, done) => {
-    if(err) {
-        return response.status(400).send(err)
-    }
-    else {
-        db.query('DELETE FROM author WHERE authorid = $1', [id], (err, result) => {
-            if(err) {
-                return response.status(400).send(err)
-            }
-            else {
-                return response.status(200).send({message: 'record deleted successfully!'});
-                
-            }
+
+        db.query('DELETE FROM author WHERE authorid = $1', [authorid]) 
+        .then(() => {
+            response.status(201).json({
+                status: "success",
+                message: "author deleted successfully!"
+            })
+        }).catch((error) => {
+            console.log(error)
+            response.status(400).json({
+                error: error,
+            })
         })
-    }
-})
+    })
 });
 
 // GET request
-router.get('/', function(request, response) {
+router.get('/', (request, response) => {
     pool.connect((err, db, done) => {
-    if(err) {
-        return response.status(400).send(err)
-    }
-    else {
-        db.query('SELECT * FROM author', (err, table) => {
-            // done();
-            if(err) {
-                return response.status(400).send(err)
-            }
-            else {
-                return response.status(200).send(table.rows);
-            }
+
+    db.query('SELECT * FROM author')
+    .then((author) => {
+        response.status(200).json({
+            status: "success",
+            data: author.rows
         })
-    }
+    }).catch((error) => {
+        console.log(error)
+        response.status(400).json({
+            error: error,
+        })
+    })
 })
 });
 
