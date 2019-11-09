@@ -9,7 +9,7 @@ const articleRoutes = require('./api/routes/article');
 const authorRoutes = require('./api/routes/author');
 const feedRoutes = require('./api/routes/feed');
 const gifRoutes = require('./api/routes/gif');
-
+const loginRoutes = require('./api/routes/login')
 // To log in the terminal
 app.use(morgan('dev'));
 app.use(cors());
@@ -29,6 +29,7 @@ app.use('/article', articleRoutes);
 app.use('/author', authorRoutes);
 app.use('/feed', feedRoutes);
 app.use('/gif', gifRoutes);
+app.use('/login', loginRoutes);
 
 
 // To handle all requests that werent handled above
