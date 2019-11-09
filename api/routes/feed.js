@@ -68,7 +68,7 @@ router.patch('/:feedid', (request, response) => {
 
 // DELETE request
 router.delete('/:feedid', (request, response) => {
-    var feedid = request.params.feedid;
+    const feedid = request.params.feedid;
     pool.connect((err, db, done) => {
 
         db.query('DELETE FROM feed WHERE feedid = $1', [feedid]) 
