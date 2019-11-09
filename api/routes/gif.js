@@ -130,7 +130,6 @@ function isValidId(req, res, next) {
     next(new Error('Invalid Gif ID'));
 }
 
-
 // GET one record
 router.get('/:gifid', isValidId, (req, res) => {
     const gifid = req.params.gifid;

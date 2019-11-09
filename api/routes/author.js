@@ -101,4 +101,31 @@ router.get('/', (request, response) => {
 })
 });
 
+//Middleware to validate ID for GET one item request
+function isValidId(req, res, next) {
+    if(!isNaN(req.params.authorid)) return next();
+    next(new Error('Invalid Author ID'));
+}
+
+// GET one record
+router.get('/:authorid', isValidId, (req, res) => {
+    const authorid = req.params.authorid;
+    pool.connect((err, db, done) => {
+     
+        db.query('SELECT * FROM author WHERE authorid = $1', [authorid])
+        .then((author) => {
+            res.status(200).json({
+                status: "success",
+                data: author.rows
+            })
+        }).catch((error) => {
+            console.log(error)
+            res.status(400).json({
+                error: error,
+                })
+            })
+        })
+});
+
+
 module.exports = router;
