@@ -4,12 +4,6 @@ const morgan = require('morgan');
 const cors = require('cors');
 const app = express();
 
-// ROUTES 
-const articleRoutes = require('./api/routes/article');
-const authorRoutes = require('./api/routes/author');
-const feedRoutes = require('./api/routes/feed');
-const gifRoutes = require('./api/routes/gif');
-const loginRoutes = require('./api/routes/login')
 // To log in the terminal
 app.use(morgan('dev'));
 app.use(cors());
@@ -25,11 +19,23 @@ app.use((request, response, next) => {
     next();
   });
 
-app.use('/article', articleRoutes);
-app.use('/author', authorRoutes);
-app.use('/feed', feedRoutes);
-app.use('/gif', gifRoutes);
-app.use('/login', loginRoutes);
+// ROUTES 
+const articleRoutes = require('./api/routes/article');
+const authorRoutes = require('./api/routes/author');
+const feedRoutes = require('./api/routes/feed');
+const gifRoutes = require('./api/routes/gif');
+
+//AUTH ROUTES
+const usersRoutes = require('./auth/users');
+
+//APIs
+app.use('/api/v1/article', articleRoutes);
+app.use('/api/v1/author', authorRoutes);
+app.use('/api/v1/feed', feedRoutes);
+app.use('/api/v1/gif', gifRoutes);
+
+//AUTH APIs
+app.use('/auth/v1/signup', usersRoutes);
 
 
 // To handle all requests that werent handled above
