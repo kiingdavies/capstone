@@ -17,18 +17,31 @@ const pool = new pg.Pool({
 });
 
 // JWT
+function validUser(user) {
+    const validEmail = typeof user.email == 'string' && 
+                        user.email.trim() != '';
+    const validPassword = typeof user.password == 'string' && 
+                            user.password.trim() != '' && 
+                            user.password.trim().length >= 6;
+
+    return validEmail && validPassword;
+}
+
 // POST route
-router.post('/auth/signup', (req, res) => {
-    const feedid = request.body.feedid;
-    const createdon = request.body.createdon;
-    const title = request.body.title;
-    const gifurl = request.body.gifurl;
-    const authorid = request.body.authorid;
-   
-    let values = [ feedid, createdon, title, gifurl, authorid];
+router.post('/', (request, response, next) => {
+    const firstname = request.body.firstname;
+    const lastname = request.body.lastname;
+    const email = request.body.email;
+    const password = request.body.password;
+    const gender = request.body.gender;
+    const jobrole = request.body.jobrole;
+    const department = request.body.department;
+    const address = request.body.address;
+
+    let values = [firstname, lastname, email, password, gender, jobrole, department, address];
     pool.connect((err, db, done) => {
-    
-        db.query('INSERT INTO feed ( feedid, createdon, title, gifurl, authorid) VALUES($1, $2, $3, $4, $5)', [...values])
+   
+        db.query('INSERT INTO users ( firstname, lastname, email, password, gender, jobrole, department, address) VALUES($1, $2, $3, $4, $5, $6, $7, $8)', [...values]) 
         .then(() => {
             response.status(201).json({
                 status: "success",
@@ -56,6 +69,26 @@ router.get('/', (request, response) => {
         }).catch((error) => {
             console.log(error)
             response.status(400).json({
+                error: error,
+                })
+            })
+        })
+});
+
+// GET one record
+router.get('/:email', (req, res) => {
+    const email = req.params.email;
+    pool.connect((err, db, done) => {
+     
+        db.query('SELECT * FROM users WHERE email = $1', [email])
+        .then((users) => {
+            res.status(200).json({
+                status: "success",
+                data: users.rows
+            })
+        }).catch((error) => {
+            console.log(error)
+            res.status(400).json({
                 error: error,
                 })
             })
