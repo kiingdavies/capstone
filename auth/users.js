@@ -1,7 +1,8 @@
 const pg = require('pg');
 const express = require('express');
-const router = express.Router();
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const router = express.Router();
 const app = express();
 
 app.use(express.json());
@@ -17,43 +18,47 @@ const pool = new pg.Pool({
 });
 
 // JWT
-function validUser(user) {
-    const validEmail = typeof user.email == 'string' && 
-                        user.email.trim() != '';
-    const validPassword = typeof user.password == 'string' && 
-                            user.password.trim() != '' && 
-                            user.password.trim().length >= 6;
+function validUser(users) {
+    const validEmail = typeof users.email == 'string' && 
+                        users.email.trim() != '';
+    const validPassword = typeof users.password == 'string' && 
+                            users.password.trim() != '' && 
+                            users.password.trim().length >= 6;
 
     return validEmail && validPassword;
 }
 
 // POST route
 router.post('/', (request, response, next) => {
-    const firstname = request.body.firstname;
-    const lastname = request.body.lastname;
-    const email = request.body.email;
-    const password = request.body.password;
-    const gender = request.body.gender;
-    const jobrole = request.body.jobrole;
-    const department = request.body.department;
-    const address = request.body.address;
 
-    let values = [firstname, lastname, email, password, gender, jobrole, department, address];
-    pool.connect((err, db, done) => {
-   
-        db.query('INSERT INTO users ( firstname, lastname, email, password, gender, jobrole, department, address) VALUES($1, $2, $3, $4, $5, $6, $7, $8)', [...values]) 
-        .then(() => {
-            response.status(201).json({
-                status: "success",
-                message: "User Created Successfully!"
-            })
-        }).catch((error) => {
-            console.log(error)
-            response.status(400).json({
-                error: error,
+        const hash = bcrypt.hash(request.body.password, 10);
+        const firstname = request.body.firstname;
+        const lastname = request.body.lastname;
+        const email = request.body.email;
+        const password = hash;
+        const gender = request.body.gender;
+        const jobrole = request.body.jobrole;
+        const department = request.body.department;
+        const address = request.body.address;
+    
+        let values = [firstname, lastname, email, password, gender, jobrole, department, address];
+        pool.connect((err, db, done) => {
+       
+            db.query('INSERT INTO users ( firstname, lastname, email, password, gender, jobrole, department, address) VALUES($1, $2, $3, $4, $5, $6, $7, $8)', [...values]) 
+            .then(() => {
+                response.status(201).json({
+                    status: "success",
+                    message: "User Added Successfully!"
+                })
+            }).catch((error) => {
+                console.erro(error)
+                response.status(400).json({
+                    status: "error",
+                    error: "An error occured, Please Try again",
+                })
             })
         })
-    })
+
 });
 
 //GET route
