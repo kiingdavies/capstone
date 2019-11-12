@@ -105,4 +105,30 @@ router.get('/', (request, response) => {
 })
 });
 
+//Middleware to validate ID for GET one item request
+function isValidId(req, res, next) {
+    if(!isNaN(req.params.articleid)) return next();
+    next(new Error('Invalid Article ID'));
+}
+
+// GET one record
+router.get('/:articleid', isValidId, (req, res) => {
+    const articleid = req.params.articleid;
+    pool.connect((err, db, done) => {
+     
+        db.query('SELECT * FROM article WHERE articleid = $1', [articleid])
+        .then((article) => {
+            res.status(200).json({
+                status: "success",
+                data: article.rows
+            })
+        }).catch((error) => {
+            console.log(error)
+            res.status(400).json({
+                error: error,
+                })
+            })
+        })
+});
+
 module.exports = router;
