@@ -21,19 +21,30 @@ const pool = new pg.Pool({
 // BCRYPT & HASHING of PASSWORD
 // SIGNUP POST route
 router.post('/',(request, response, next) => {
-        
-    const hash = bcrypt.hash(request.body.password, 10);
+    const email = request.body.email;
+    const password = request.body.password;
+
+    if(!email || !password)
+    {
+        return response.status(400).send({'message': 'Some values are missing'});
+    }
+
+    if(!Helper.isValidEmail(email)) {
+        return response.status(401).send({'message': 'Please enter a valid email address'});
+    }
+    
+    const hash = (Helper.hashPassword(password));
     
         const firstname = request.body.firstname;
         const lastname = request.body.lastname;
-        const email = request.body.email;
-        const password =  hash;
+        const Email = email;
+        const Password = hash;
         const gender = request.body.gender;
         const jobrole = request.body.jobrole;
         const department = request.body.department;
         const address = request.body.address;
     
-        let values = [firstname, lastname, email, password, gender, jobrole, department, address];
+        let values = [firstname, lastname, Email, Password, gender, jobrole, department, address];
         pool.connect((err, db, done) => {
        
             db.query('INSERT INTO users ( firstname, lastname, email, password, gender, jobrole, department, address) VALUES($1, $2, $3, $4, $5, $6, $7, $8)', [...values]) 
@@ -51,52 +62,6 @@ router.post('/',(request, response, next) => {
             })
         })
 });
-
-// LOGIN POST route
-// router.post('/',(request, response, next) => {
-//     const email = request.body.email;
-//     const password = request.body.password;
-
-//     if(!email || !password)
-//     {
-//         return response.status(400).send({'message': 'Some values are missing'});
-//     }
-
-//     if(!Helper.isValidEmail(email)) {
-//         return response.status(401).send({'message': 'Please enter a valid email address'});
-//     }
-     
-//     pool.connect((err, db, done) => {
-//         db.query('SELECT * FROM users WHERE email = $1', [email]) 
-//             .then((result) => {
-//                 if(result.rows[0] == null)
-//                 {
-//                     response.status(401).json({
-//                         status: "error",
-//                         message: "Account doesnt exist. Please Check and Try Again!"
-//                     })
-//                 }
-//                 let passwordHash = result.rows[0].password;
-//                 if(!Helper.comparePassword(passwordHash, password))
-//                 {
-//                     console.log(password)
-//                     response.status(400).json({
-//                         status: "error",
-//                         message: "Incorrect Email/Password"
-//                     })  
-//                 }
-//                 const token = jwt.sign({userId: result.rows[0].password},'RANDOM_KEY',{ expiresIn: '24h'});
-//                 response.status(200).json({
-//                     status: "success",
-//                     data: {
-//                         userId: result.rows[0].userid,
-//                         token: token
-//                     }
-//                 })
-//         }) 
-//     })
-// });
-
 
 // DELETE user by email ROUTE
 router.delete('/:email', (request, response) => {
