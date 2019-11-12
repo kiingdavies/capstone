@@ -4,7 +4,7 @@ const router = express.Router();
 const app = express();
 app.use(express.json());
 
-// POSTGRESQL connection
+// POSTGRESQL connection 
 const pool = new pg.Pool({
     port: 5432,
     password: 'adedeji007',
@@ -86,7 +86,7 @@ router.patch('/:gifid',(request, response) => {
 
 // DELETE request
 router.delete('/:gifid', (request, response) => {
-    var gifid = request.params.gifid;
+    const gifid = request.params.gifid;
     pool.connect((err, db, done) => {
 
         db.query('DELETE FROM gif WHERE gifid = $1', [gifid]) 
@@ -124,5 +124,30 @@ router.get('/', (request, response) => {
     })
 });
 
+//Middleware to validate ID for GET one item request
+function isValidId(req, res, next) {
+    if(!isNaN(req.params.gifid)) return next();
+    next(new Error('Invalid Gif ID'));
+}
+
+// GET one record
+router.get('/:gifid', isValidId, (req, res) => {
+    const gifid = req.params.gifid;
+    pool.connect((err, db, done) => {
+     
+        db.query('SELECT * FROM gif WHERE gifid = $1', [gifid])
+        .then((gif) => {
+            res.status(200).json({
+                status: "success",
+                data: gif.rows
+            })
+        }).catch((error) => {
+            console.log(error)
+            res.status(400).json({
+                error: error,
+                })
+            })
+        })
+});
 
 module.exports = router;

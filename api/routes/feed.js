@@ -4,7 +4,7 @@ const router = express.Router();
 const app = express();
 app.use(express.json());
 
-// POSTGRESQL connection
+// POSTGRESQL connection 
 const pool = new pg.Pool({
     port: 5432,
     password: 'adedeji007',
@@ -41,7 +41,7 @@ router.post('/', (request, response) => {
 });
 
 // UPDATE request
-router.patch('/:feedid',(request, response) => {
+router.patch('/:feedid', (request, response) => {
     const createdon = request.body.createdon;
     const title = request.body.title;
     const gifurl = request.body.gifurl;
@@ -68,7 +68,7 @@ router.patch('/:feedid',(request, response) => {
 
 // DELETE request
 router.delete('/:feedid', (request, response) => {
-    var feedid = request.params.feedid;
+    const feedid = request.params.feedid;
     pool.connect((err, db, done) => {
 
         db.query('DELETE FROM feed WHERE feedid = $1', [feedid]) 
@@ -100,10 +100,37 @@ router.get('/', (request, response) => {
         console.log(error)
         response.status(400).json({
             error: error,
+            })
         })
     })
-})
 });
 
+
+//Middleware to validate ID for GET one item request
+function isValidId(req, res, next) {
+    if(!isNaN(req.params.feedid)) return next();
+    next(new Error('Invalid Feed ID'));
+}
+
+
+// GET one record
+router.get('/:feedid', isValidId, (req, res) => {
+    const feedid = req.params.feedid;
+    pool.connect((err, db, done) => {
+     
+        db.query('SELECT * FROM feed WHERE feedid = $1', [feedid])
+        .then((feed) => {
+            res.status(200).json({
+                status: "success",
+                data: feed.rows
+            })
+        }).catch((error) => {
+            console.log(error)
+            res.status(400).json({
+                error: error,
+                })
+            })
+        })
+});
 
 module.exports = router;
