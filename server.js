@@ -8,10 +8,17 @@ const normalizePort = val => {
 
     if(isNaN(port)) {
         return val;
+
     }
     if(port >= 0) {
         return port;
     }
+
+    }
+    if(port >= 0) {
+        return port;
+    }
+
     return false;
 };
 const port = normalizePort( process.env.PORT || 3000);
@@ -52,10 +59,18 @@ const onError = (error) => {
     }
 }
 
+
 // Listen on provided port 
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
 
+
+
+
+// Listen on provided port  
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
 

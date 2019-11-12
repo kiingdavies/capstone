@@ -4,7 +4,9 @@ const router = express.Router();
 const app = express();
 app.use(express.json());
 
+
 // POSTGRESQL connection
+
 const pool = new pg.Pool({
     port: 5432,
     password: 'adedeji007',
