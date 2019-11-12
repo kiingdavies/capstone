@@ -49,14 +49,10 @@ const onError = (error) => {
             break;
         default:
             throw error;
-            
     }
 }
 
-// Listen on provided port 
+// Listen on provided port  
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
-
-
-
