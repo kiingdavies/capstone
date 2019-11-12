@@ -2,6 +2,7 @@ const pg = require('pg');
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const Helper = require('./authHelper');
 const router = express.Router();
 const app = express();
 
@@ -17,25 +18,16 @@ const pool = new pg.Pool({
     user: 'postgres'
 });
 
-// JWT
-function validUser(users) {
-    const validEmail = typeof users.email == 'string' && 
-                        users.email.trim() != '';
-    const validPassword = typeof users.password == 'string' && 
-                            users.password.trim() != '' && 
-                            users.password.trim().length >= 6;
-
-    return validEmail && validPassword;
-}
-
-// POST route
-router.post('/', (request, response, next) => {
-
-        const hash = bcrypt.hash(request.body.password, 10);
+// BCRYPT & HASHING of PASSWORD
+// SIGNUP POST route
+router.post('/',(request, response, next) => {
+        
+    const hash = bcrypt.hash(request.body.password, 10);
+    
         const firstname = request.body.firstname;
         const lastname = request.body.lastname;
         const email = request.body.email;
-        const password = hash;
+        const password =  hash;
         const gender = request.body.gender;
         const jobrole = request.body.jobrole;
         const department = request.body.department;
@@ -48,20 +40,85 @@ router.post('/', (request, response, next) => {
             .then(() => {
                 response.status(201).json({
                     status: "success",
-                    message: "User Added Successfully!"
+                    message: "User Account Successfully created!"
                 })
             }).catch((error) => {
-                console.erro(error)
-                response.status(400).json({
+                console.error(error)
+                response.status(500).json({
                     status: "error",
                     error: "An error occured, Please Try again",
                 })
             })
         })
-
 });
 
-//GET route
+// LOGIN POST route
+// router.post('/',(request, response, next) => {
+//     const email = request.body.email;
+//     const password = request.body.password;
+
+//     if(!email || !password)
+//     {
+//         return response.status(400).send({'message': 'Some values are missing'});
+//     }
+
+//     if(!Helper.isValidEmail(email)) {
+//         return response.status(401).send({'message': 'Please enter a valid email address'});
+//     }
+     
+//     pool.connect((err, db, done) => {
+//         db.query('SELECT * FROM users WHERE email = $1', [email]) 
+//             .then((result) => {
+//                 if(result.rows[0] == null)
+//                 {
+//                     response.status(401).json({
+//                         status: "error",
+//                         message: "Account doesnt exist. Please Check and Try Again!"
+//                     })
+//                 }
+//                 let passwordHash = result.rows[0].password;
+//                 if(!Helper.comparePassword(passwordHash, password))
+//                 {
+//                     console.log(password)
+//                     response.status(400).json({
+//                         status: "error",
+//                         message: "Incorrect Email/Password"
+//                     })  
+//                 }
+//                 const token = jwt.sign({userId: result.rows[0].password},'RANDOM_KEY',{ expiresIn: '24h'});
+//                 response.status(200).json({
+//                     status: "success",
+//                     data: {
+//                         userId: result.rows[0].userid,
+//                         token: token
+//                     }
+//                 })
+//         }) 
+//     })
+// });
+
+
+// DELETE user by email ROUTE
+router.delete('/:email', (request, response) => {
+    const email = request.params.email;
+    pool.connect((err, db, done) => {
+
+        db.query('DELETE FROM users WHERE email = $1', [email]) 
+        .then(() => {
+            response.status(201).json({
+                status: "success",
+                message: "User deleted successfully!"
+            })
+        }).catch((error) => {
+            console.log(error)
+            response.status(400).json({
+                error: error,
+            })
+        })
+    })
+});
+
+//GET all users route
 router.get('/', (request, response) => {
     pool.connect((err, db, done) => {
 
@@ -80,7 +137,7 @@ router.get('/', (request, response) => {
         })
 });
 
-// GET one record
+// GET one user by email route
 router.get('/:email', (req, res) => {
     const email = req.params.email;
     pool.connect((err, db, done) => {

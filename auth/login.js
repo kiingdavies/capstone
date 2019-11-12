@@ -1,8 +1,10 @@
 const pg = require('pg');
 const express = require('express');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const Helper = require('./authHelper');
 const router = express.Router();
 const app = express();
-const jwt = require('jsonwebtoken');
 
 app.use(express.json());
 
@@ -16,55 +18,49 @@ const pool = new pg.Pool({
     user: 'postgres'
 });
 
-// JWT
-// POST route
-router.post('/', (req, res) => {
-    // Mock user 
-    const user = {
-        id: 1,
-        username: 'brad',
-        email: 'brad@gmail.com'
+// LOGIN POST route
+router.post('/',(request, response, next) => {
+    const email = request.body.email;
+    const password = request.body.password;
+
+    if(!email || !password)
+    {
+        return response.status(400).send({'message': 'Some values are missing'});
     }
+
+    if(!Helper.isValidEmail(email)) {
+        return response.status(401).send({'message': 'Please enter a valid email address'});
+    }
+     
     pool.connect((err, db, done) => {
-
-        db.query('SELECT NOW()')
-        .then(() => {
-            jwt.sign({user}, 'secretkey', (err, token) => {
-                res.json({
-                    token
-                });
-            });
-        }).catch((error) => {
-            console.log(error)
-            response.status(400).json({
-                error: error,
+        db.query('SELECT * FROM users WHERE email = $1', [email]) 
+            .then((result) => {
+                if(result.rows[0] == null)
+                {
+                    response.status(401).json({
+                        status: "error",
+                        message: "Account doesnt exist. Please Check and Try Again!"
+                    })
+                }
+                let passwordHash = result.rows[0].password;
+                if(!Helper.comparePassword(passwordHash, password))
+                {
+                    console.log(password)
+                    response.status(400).json({
+                        status: "error",
+                        message: "Incorrect Email/Password"
+                    })  
+                }
+                const token = jwt.sign({userId: result.rows[0].password},'RANDOM_KEY',{ expiresIn: '24h'});
+                response.status(200).json({
+                    status: "success",
+                    data: {
+                        userId: result.rows[0].userid,
+                        token: token
+                    }
                 })
-            })
-        })
-    // jwt.sign({user}, 'secretkey', (err, token) => {
-    //     res.json({
-    //         token
-    //     });
-    // });
+        }) 
+    })
 });
-
-//GET route
-// router.get('/', (req, res) => {
-//     pool.connect((err, db, done) => {
-
-//     db.query('SELECT NOW()')
-//     .then(() => {
-//         res.status(200).json({
-            
-//             message: 'Welcome'
-//         })
-//     }).catch((error) => {
-//         console.log(error)
-//         response.status(400).json({
-//             error: error,
-//             })
-//         })
-//     })
-// });
 
 module.exports = router;

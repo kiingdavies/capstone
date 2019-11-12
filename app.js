@@ -27,6 +27,7 @@ const gifRoutes = require('./api/routes/gif');
 
 //AUTH ROUTES
 const usersRoutes = require('./auth/users');
+const loginRoutes = require('./auth/login');
 
 //APIs
 app.use('/api/v1/article', articleRoutes);
@@ -36,6 +37,7 @@ app.use('/api/v1/gif', gifRoutes);
 
 //AUTH APIs
 app.use('/auth/v1/signup', usersRoutes);
+app.use('/auth/v1/login', loginRoutes);
 
 
 // To handle all requests that werent handled above
