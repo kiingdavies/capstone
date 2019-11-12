@@ -19,20 +19,6 @@ const Helper = {
     isValidEmail(email) {
         return /\S+@\S+\.\S+/.test(email);
     },
-    /**
-     * isValidPassword 
-     * @param {string} password
-     * @returns {Boolean} return True or False
-     * 
-     */
-    hashPassword(password) {
-        if(password.length < 10){
-            return error;
-        }else {
-            return bcrypt.hash(password, 10);
-        }
-        
-    }
-};
-
+    
+}
 module.exports = Helper;

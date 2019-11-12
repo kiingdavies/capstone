@@ -33,23 +33,22 @@ router.post('/',(request, response, next) => {
         return response.status(401).send({'message': 'Please enter a valid email address'});
     }
     
-    const hash = (Helper.hashPassword(password));
-    
         const firstname = request.body.firstname;
         const lastname = request.body.lastname;
         const Email = email;
-        const Password = hash;
+        const Password = bcrypt.hash(password, 10);
         const gender = request.body.gender;
         const jobrole = request.body.jobrole;
         const department = request.body.department;
         const address = request.body.address;
+        
     
         let values = [firstname, lastname, Email, Password, gender, jobrole, department, address];
         pool.connect((err, db, done) => {
        
             db.query('INSERT INTO users ( firstname, lastname, email, password, gender, jobrole, department, address) VALUES($1, $2, $3, $4, $5, $6, $7, $8)', [...values]) 
             .then(() => {
-                response.status(201).json({
+                response.json({
                     status: "success",
                     message: "User Account Successfully created!"
                 })
