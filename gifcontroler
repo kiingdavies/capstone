@@ -1,0 +1,155 @@
+POST gif controler
+const { pool } = require('../config/database-config');
+const cloud = require('../config/cloudinary-config');
+const date = new Date();
+
+
+exports.createGif = (req, res) => {
+try{
+    const imageDetails = {
+       title: req.body.title,
+     }
+     // Checks if Gif title exist already
+     pool.query('SELECT * FROM "Gifs" WHERE "title" = $1',[imageDetails.title])
+     .then((result) => {
+         if(result.rowCount >= 1)
+         {
+             res.status(400).json({
+                 status: "error",
+                 message: "file already exist"
+             })
+         }
+         else
+         {
+            const imageDetails = {
+                UserId: req.body.UserId,
+                title: req.body.title,
+                image: req.files[0].path,
+                imageId: ''
+                }
+
+                // Post image in cloudinary
+                cloud.uploads(imageDetails.image).then((result) => {
+                    const imageDetails = {
+                        UserId: req.body.UserId,
+                        title: req.body.title,
+                        image: result.url,
+                        imageId: result.id   
+                    }
+                    // Track the file in the database
+                    pool.query('INSERT INTO "Gifs"("UserID","title","imageUrl","imageId","createdAt") VALUES ($1, $2, $3, $4,$5)',
+                    [imageDetails.UserId,imageDetails.title,imageDetails.image,imageDetails.imageId,date])
+                    .then(() => {
+                        res.status(200).json({
+                            status: "success",
+                            message: "Gif successfuly uploaded"
+                        })
+                    }).catch(() => {
+                        res.status(400).json({
+                            status: "error",
+                            message : "An error Occurred"
+                        })
+                    })
+                }).catch((error) => {
+                    console.error(error);
+                    res.status(400).json({
+                        status: "error",
+                        message: "Failed to Upload your File"
+                    })
+                })
+         }
+     }).catch(() => {
+
+         res.status(400).json({
+            status: "error",
+            message: "an error occurred, please try again"
+         })
+     })
+
+}
+catch(execptions){
+    console.log(execptions)
+    }
+};
+
+exports.deleteGif = (req, res) => {
+    try{
+        const id = parseInt(req.params.id)
+
+        pool.query('DELETE FROM "Gifs" WHERE "Id" = $1', [id])
+        .then(() => {
+            res.status(200).json({
+                status: "success",
+                message: "gif deleted successfully"
+            })
+        }).catch(() => {
+            res.status(400).json({
+                status: "error",
+                message: "could not delete the gif. please try again"
+            })
+        })
+
+    }
+    catch(execptions)
+    {
+        console.log(execptions)
+    }
+
+}
+
+exports.commentGif = (req, res) => {
+    try
+    {
+        const id = parseInt(req.params.id)
+        const UserId = req.body.UserId
+        const gifID = id
+        const comment =req.body.comment
+        console.log(id)
+
+        pool.query('INSERT INTO "GifComment"("userID", "gifID", comment, "createdAt")VALUES ($1, $2, $3, $4)',[UserId,gifID,comment,date])
+        .then((result) => {
+            res.status(200).json({
+                status: "success",
+                data: result.rows,
+                message: "You Commented was posted successfully"
+            })
+        }).catch((error) => {
+            console.log(error)
+            res.status(400).json({
+                status: "error",
+                message: "An error occurred, Please try again"
+            })
+        })
+    }
+    catch(execptions)
+    {
+        console.log(execptions)
+    }
+};
+
+exports.getGif = (req,res) => {
+    try
+    {
+        const id = parseInt(req.params.id)
+
+        pool.query('SELECT "u"."firstName","u"."lastName",  "g"."title", "g"."imageUrl","g"."createdAt" FROM "Gifs" g INNER JOIN "Users" u  on "g"."UserID" = "u"."Id" WHERE "g"."Id" = $1',[id])
+        .then((result) => {
+            res.status(200).json({
+                status: "success",
+                data: result.rows,
+
+            }).catch((error) => {
+                console.error(error)
+                res.status(401).json({
+                    status: "error",
+                    message: "an error occurred"
+                })
+            })
+        })
+
+    }
+    catch(execptions)
+    {
+        console.log(execptions)
+    }
+}
