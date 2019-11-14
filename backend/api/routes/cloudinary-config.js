@@ -1,5 +1,5 @@
-Cloudinary config
-
+// Cloudinary config
+const  cloudinary = require('cloudinary');
 cloudinary.config({
     cloud_name: 'kingdavies',
     api_key: '316716334214498',
@@ -7,9 +7,9 @@ cloudinary.config({
 })
 
 
-exports.uploads = (file) =>{
+exports.uploads = (file) => {
     return new Promise(resolve => {
-    cloudinary.uploader.upload(file, (result) =>{
+    cloudinary.uploader.upload(file, (result) => {
     resolve({url: result.url, id: result.public_id})
     }, {resource_type: "auto"})
     })

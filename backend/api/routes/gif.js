@@ -2,7 +2,7 @@ const pg = require('pg');
 const express = require('express');
 const cloudinary = require('cloudinary').v2;
 const fileupload = require('express-fileupload');
-const cloud = require('api\config\cloudinary-config.js')
+const cloud = require('./cloudinary-config');
 const router = express.Router();
 const app = express();
 const date = new Date();
@@ -21,12 +21,7 @@ const pool = new pg.Pool({
     user: 'postgres'
 });
 
-//CLOUDINARY CONFIG
-// cloudinary.config({
-//     cloud_name: 'kingdavies',
-//     api_key: '316716334214498',
-//     api_secret: 'Div1XEDprcmytn48_Y39JY4cqjg'
-// })
+
 // Testing cloud posts
 router.post('/', (req, res) => {
     try{
@@ -43,8 +38,8 @@ router.post('/', (req, res) => {
                      status: "error",
                      message: "file already exist"
                  })
-             }
-    else
+         }
+        else
          {
             const imageDetails = {
                 userid: req.body.userid,
@@ -56,15 +51,15 @@ router.post('/', (req, res) => {
 //                 // Post image in cloudinary
                 cloud.uploads(imageDetails.image).then((result) => {
                     const imageDetails = {
-                        userid: req.body.UserId,
+                        userid: req.body.userid,
                         title: req.body.title,
                         image: result.url,
                         imageid: result.id   
                     }
 //                     // Track the file in the database
 // pool.connect((err, db, done) => { 
-                    db.query('INSERT INTO "Gifs"("UserID","title","imageUrl","imageId","createdAt") VALUES ($1, $2, $3, $4,$5)',
-                    [imageDetails.useridd,imageDetails.title,imageDetails.image,imageDetails.imageid,date])
+                    db.query('INSERT INTO "gif"("userid","title","imageurl","imageid","createdat") VALUES ($1, $2, $3, $4,$5)',
+                    [imageDetails.userid,imageDetails.title,imageDetails.image,imageDetails.imageid,date])
                     .then(() => {
                         res.status(200).json({
                             status: "success",
@@ -100,70 +95,42 @@ router.post('/', (req, res) => {
 
 });
 
-
-
-
-
-
-
-//     let values = [gifid, message, createdon, title, imageurl];
-//     pool.connect((err, db, done) => {
-   
-//         db.query('INSERT INTO gif (gifid, message, createdon, title, imageurl) VALUES($1, $2, $3, $4, $5)', [...values]) 
-//         .then(() => {
-//             response.status(201).json({
-//                 status: "success",
-//                 message: "gif posted successfully!"
-//             })
-//         }).catch((error) => {
-//             console.log(error)
-//             response.status(400).json({
-//                 error: error,
-//             })
-//         })
-//     })
-// });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// POST request
-// router.post('/', (request, response) => {
-//     const gifid = request.body.gifid;
-//     const message = request.body.message;
+// POST  comment request
+router.post('/', (request, response) => {
+    try {
+    const id = parseInt(request.body.id);
+    const userid = request.body.userid;
+    const gifid = request.body.gifid;
+    const comment = request.body.comment;
+    console.log(id);
+    
 //     const createdon = request.body.createdon;
 //     const title = request.body.title;
 //     const imageurl = request.body.imageurl;
 
-//     let values = [gifid, message, createdon, title, imageurl];
-//     pool.connect((err, db, done) => {
+    let values = [userid, gifid, comment, createdat];
+    pool.connect((err, db, done) => {
    
-//         db.query('INSERT INTO gif (gifid, message, createdon, title, imageurl) VALUES($1, $2, $3, $4, $5)', [...values]) 
-//         .then(() => {
-//             response.status(201).json({
-//                 status: "success",
-//                 message: "gif posted successfully!"
-//             })
-//         }).catch((error) => {
-//             console.log(error)
-//             response.status(400).json({
-//                 error: error,
-//             })
-//         })
-//     })
-// });
+        db.query('INSERT INTO gif (userid, gifid, comment, createdat) VALUES($1, $2, $3, $4)', [...values]) 
+        .then((result) => {
+            response.status(201).json({
+                status: "success",
+                data: result.rows,
+                message: "Your Comment was posted successfully!"
+            })
+        }).catch((error) => {
+            console.log(error)
+            response.status(400).json({
+                error: error,
+            })
+        })
+    })
+  }catch(execptions)
+  {
+      console.log(execptions);
+      
+  }
+});
 
 // UPDATE request
 router.patch('/:gifid',(request, response) => {
@@ -193,7 +160,8 @@ router.patch('/:gifid',(request, response) => {
 
 // DELETE request
 router.delete('/:gifid', (request, response) => {
-    const gifid = request.params.gifid;
+    try{
+    const gifid = parseInt(request.params.gifid);
     pool.connect((err, db, done) => {
 
         db.query('DELETE FROM gif WHERE gifid = $1', [gifid]) 
@@ -209,6 +177,11 @@ router.delete('/:gifid', (request, response) => {
             })
         })
     })
+    }catch(execptions)
+    {
+        console.log(execptions);
+        
+    }
 });
 
 
@@ -239,22 +212,29 @@ function isValidId(req, res, next) {
 
 // GET one record
 router.get('/:gifid', isValidId, (req, res) => {
+    try{
     const gifid = req.params.gifid;
     pool.connect((err, db, done) => {
      
-        db.query('SELECT * FROM gif WHERE gifid = $1', [gifid])
-        .then((gif) => {
+        db.query('SELECT "u"."firstname", "u"."lastname", "g"."title", "g"."imageurl", "g"."createdat" FROM gif g INNER JOIN "users" u  WHERE gifid = $1', [gifid])
+        .then((result) => {
             res.status(200).json({
                 status: "success",
-                data: gif.rows
+                data: result.rows
             })
         }).catch((error) => {
             console.log(error)
-            res.status(400).json({
-                error: error,
+            res.status(401).json({
+                status: "error",
+                message: "an error occurred"
                 })
             })
         })
+    } catch(execptions)
+    {
+        console.log(execptions);
+        
+    }
 });
 
 module.exports = router;
