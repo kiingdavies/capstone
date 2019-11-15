@@ -7,7 +7,7 @@ app.use(express.json());
 // POSTGRESQL connection
 const pool = new pg.Pool({
     port: 5432,
-    password: 'adedeji007',
+    password: '',
     database: 'teamwork',
     max: 10,
     host: 'localhost',
