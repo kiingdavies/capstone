@@ -1,6 +1,6 @@
 const pg = require('pg');
 const express = require('express');
-const cloudinary = require('cloudinary').v2;
+// const cloudinary = require('cloudinary').v2;
 const fileupload = require('express-fileupload');
 const cloud = require('./cloudinary-config');
 const router = express.Router();
@@ -216,11 +216,11 @@ router.get('/:gifid', isValidId, (req, res) => {
     const gifid = req.params.gifid;
     pool.connect((err, db, done) => {
      
-        db.query('SELECT "u"."firstname", "u"."lastname", "g"."title", "g"."imageurl", "g"."createdat" FROM gif g INNER JOIN "users" u  WHERE gifid = $1', [gifid])
+        db.query('SELECT "u"."firstname", "u"."lastname", "g"."title", "g"."imageurl", "g"."createdat" FROM "gif" g INNER JOIN "users" u  on "g"."userid" = "u"."gifid" WHERE "g"."gifid" = $1',[gifid])
         .then((result) => {
             res.status(200).json({
                 status: "success",
-                data: result.rows
+                data: result.rows 
             })
         }).catch((error) => {
             console.log(error)
