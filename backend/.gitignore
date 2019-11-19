@@ -1,3 +1,4 @@
 node_modules
 .env
+capstone\backend\api\config\cloudinary-config.js
 yarn-error.log

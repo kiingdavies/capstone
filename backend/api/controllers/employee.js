@@ -1,10 +1,10 @@
 const bcrypt = require('bcrypt');
-const db = require('../db');
+// const db = require('../db');
 const pool = require("../models/queries");
 const jwt = require('jsonwebtoken');
 
 
-// CREATE USER
+// CREATE USER 
 const signup = (request, response) => {
   const {firstname, lastname, email, password, gender, jobrole, department, address } = request.body; 
 
